@@ -22,10 +22,7 @@
     "typeRoots": ["src/@types", "node_modules/@types"],
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
-    "paths": {
-      "@pkg/*": ["src/*", "bin/*"]
-    }
+    "resolveJsonModule": true
   },
   "include": ["src"],
   "exclude": ["node_modules", "tests"]

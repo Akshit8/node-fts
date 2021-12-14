@@ -102,3 +102,13 @@ dist
 
 # TernJS port file
 .tern-port
+
+# js build bundles
+bin
+
+# ide settings
+.vscode
+.idea
+
+# self used files
+resource.txt
