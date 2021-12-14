@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    "lib": ["es2019"],
+    "allowJs": true,
+    "checkJs": true,
+    "baseUrl": "./",
+    "emitDecoratorMetadata": true,
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "strictPropertyInitialization": false,
+    "importHelpers": false,
+    "module": "commonjs",
+    "outDir": "bin",
+    "rootDir": "src",
+    "removeComments": true,
+    "sourceMap": false,
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "target": "ES6",
+    "moduleResolution": "node",
+    "typeRoots": ["src/@types", "node_modules/@types"],
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "paths": {
+      "@pkg/*": ["src/*", "bin/*"]
+    }
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "tests"]
+}

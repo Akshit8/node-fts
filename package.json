@@ -1,0 +1,56 @@
+{
+  "name": "node-fts",
+  "version": "1.0.0",
+  "description": "full text search design in node",
+  "main": "bin/server.js",
+  "scripts": {
+    "dev": "nodemon",
+    "build": "tsc -p  tsconfig.json",
+    "start": "node bin/server.js",
+    "lint": "eslint --fix --ext .ts,.js .",
+    "format": "prettier --ignore-path .gitignore --write \"**/*.+(js|ts|json)\"",
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Akshit8/node-fts.git"
+  },
+  "keywords": [
+    "node",
+    "fts",
+    "typescript"
+  ],
+  "author": "akshitsadana@gmail.com",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Akshit8/node-fts/issues"
+  },
+  "homepage": "https://github.com/Akshit8/node-fts#readme",
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.ts": [
+      "npm run format",
+      "npm run lint"
+    ]
+  },
+  "devDependencies": {
+    "@types/node": "^16.11.12",
+    "@typescript-eslint/eslint-plugin": "^5.7.0",
+    "@typescript-eslint/parser": "^5.7.0",
+    "eslint": "^7.32.0",
+    "eslint-config-standard": "^16.0.3",
+    "eslint-plugin-import": "^2.25.3",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^5.2.0",
+    "husky": "^7.0.4",
+    "lint-staged": "^12.1.2",
+    "nodemon": "^2.0.15",
+    "prettier": "^2.5.1",
+    "ts-node": "^10.4.0",
+    "typescript": "^4.5.4"
+  }
+}
