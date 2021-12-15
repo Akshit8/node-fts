@@ -1,11 +1,16 @@
 import { NextFunction, Request, Response } from "express";
+import { APIResponse } from "../types";
 import { APIError, InternalError, NotFoundError } from "../errors";
 
-export const notFoundHandler = (req: Request, res: Response, next: NextFunction) => {
+export const notFoundHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   next(new NotFoundError());
 };
 
-export const serverErrorHandler = (
+export const serverErrorHandler = async (
   err: Error,
   req: Request,
   res: Response,
@@ -25,4 +30,14 @@ export const serverErrorHandler = (
   }
 
   res.status(e.status_code).send(e);
+};
+
+export const renderAPIResponse = (resp: APIResponse, res: Response): void => {
+  let code = 200;
+  if (resp.status_code) {
+    code = resp.status_code;
+  } else {
+    resp.status_code = code;
+  }
+  res.status(code).send(resp);
 };

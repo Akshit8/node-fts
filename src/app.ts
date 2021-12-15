@@ -10,10 +10,10 @@ export const createExpressApp = async (): Promise<Express> => {
   app.use(helmet({ dnsPrefetchControl: { allow: true } }));
   app.use(cors());
 
-  app.use("/api", router);
-
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
+
+  app.use("/api", router);
 
   app.use(notFoundHandler);
   app.use(serverErrorHandler);

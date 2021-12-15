@@ -1,13 +1,19 @@
+import path from "path";
 import { exit } from "process";
 import { createExpressApp } from "./app";
 import { PORT } from "./config";
-import { ServerUtils } from "./utils";
+import { createNewPostDB } from "./db";
+import { addFixtures, ServerUtils } from "./utils";
 
 (async () => {
   try {
-    // const PostDBInstance = new PostDB();
-    const app = await createExpressApp();
+    // create post db instance
+    createNewPostDB();
 
+    // install mock fixture data in-memory
+    await addFixtures(path.join(__dirname, "../fixtures/mock_data.json"));
+
+    const app = await createExpressApp();
     console.log(await ServerUtils.start(app, +PORT));
   } catch (e) {
     console.log(`Error: ${e}`);

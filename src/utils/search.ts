@@ -37,8 +37,9 @@ export class SearchUtils {
 
     tokens.forEach((element) => {
       if (element in this.stopwords) {
-        r.push(element.toLowerCase());
+        return;
       }
+      r.push(element.toLowerCase());
     });
 
     return r;
