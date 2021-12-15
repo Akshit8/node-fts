@@ -40,6 +40,27 @@ export class PostDB {
     return posts;
   }
 
+  private intersection(l1: number[], l2: number[]): number[] {
+    const r: number[] = [];
+
+    let i = 0;
+    let j = 0;
+
+    for (; i < l1.length && j < l2.length; ) {
+      if (l1[i] < l2[j]) {
+        i++;
+      } else if (l1[i] > l2[j]) {
+        j++;
+      } else {
+        r.push(l1[i]);
+        i++;
+        j++;
+      }
+    }
+
+    return r;
+  }
+
   add(name: string, image: string, description: string, dateLastEdited?: Date): Post {
     const post: Post = {
       id: this.getAutoIncrementID(),
@@ -142,5 +163,50 @@ export class PostDB {
     }
 
     return this.returnPostsByID(ids);
+  }
+
+  search(query: string) {
+    const parsedSearchQuery = this.searchUtils.analyze(query);
+
+    let nameHits: number[] = [];
+    parsedSearchQuery.forEach((token) => {
+      if (token in this.nameSearchIndex) {
+        if (nameHits.length === 0) {
+          nameHits = this.nameSearchIndex[token];
+        } else {
+          nameHits = this.intersection(nameHits, this.nameSearchIndex[token]);
+        }
+      }
+    });
+
+    let descriptionHits: number[] = [];
+    parsedSearchQuery.forEach((token) => {
+      if (token in this.descriptionSearchIndex) {
+        if (descriptionHits.length === 0) {
+          descriptionHits = this.descriptionSearchIndex[token];
+        } else {
+          descriptionHits = this.intersection(
+            descriptionHits,
+            this.descriptionSearchIndex[token]
+          );
+        }
+      }
+    });
+
+    // const posts = {
+    //   nameHits: this.returnPostsByID(nameHits),
+    //   descriptionHits: this.returnPostsByID(descriptionHits)
+    // };
+
+    const posts: Post[] = [];
+
+    for (const key in Object.keys(this.entries)) {
+      const post = this.entries[key];
+      if (post.description.toLowerCase().includes(query)) {
+        posts.push(post);
+      }
+    }
+
+    return posts;
   }
 }
