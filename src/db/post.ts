@@ -1,4 +1,5 @@
 import {
+  DB,
   PaginationParams,
   Post,
   PostPaginatedResponse,
@@ -8,7 +9,7 @@ import {
 } from "../types";
 import { SearchUtils } from "../utils";
 
-export class PostDB {
+export class PostDB implements DB {
   private static fields: { [key: string]: string } = {
     name: "name",
     image: "image",
