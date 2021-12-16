@@ -7,13 +7,12 @@ export interface SearchIndex {
   [key: string]: number[];
 }
 
-export interface BasicMap {
-  [key: string]: object;
-}
-
 export interface PaginationParams {
   page: number;
   limit: number;
 }
 
-export interface PaginationMetaData {}
+export interface PaginatedResponseMetadata {
+  count: number;
+  next: boolean;
+}

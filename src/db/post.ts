@@ -1,17 +1,28 @@
-import { PaginationParams, Post, PostStorage, SearchIndex, SortIndex } from "../types";
+import {
+  PaginationParams,
+  Post,
+  PostPaginatedResponse,
+  PostStorage,
+  SearchIndex,
+  SortIndex
+} from "../types";
 import { SearchUtils } from "../utils";
 
-const NAME_FIELD = "name";
-const DATE_LAST_EDITED_NAME = "dateLastEdited";
-
 export class PostDB {
-  entries: PostStorage;
-  count: number;
-  nameSortIndex: SortIndex[];
-  dateModifiedSortIndex: SortIndex[];
-  nameSearchIndex: SearchIndex;
-  descriptionSearchIndex: SearchIndex;
-  searchUtils: SearchUtils;
+  private static fields: { [key: string]: string } = {
+    name: "name",
+    image: "image",
+    description: "description",
+    dateLastEdited: "dateLastEdited"
+  };
+
+  private entries: PostStorage;
+  private count: number;
+  private nameSortIndex: SortIndex[];
+  private dateModifiedSortIndex: SortIndex[];
+  private nameSearchIndex: SearchIndex;
+  private descriptionSearchIndex: SearchIndex;
+  private searchUtils: SearchUtils;
 
   constructor() {
     this.entries = {};
@@ -59,6 +70,18 @@ export class PostDB {
     }
 
     return r;
+  }
+
+  private paginateSearchResponse(
+    posts: Post[],
+    start: number,
+    end: number
+  ): PostPaginatedResponse {
+    return {
+      count: end > start ? end - start : 0,
+      next: end !== posts.length,
+      posts: end > start ? posts.slice(start, end) : []
+    };
   }
 
   add(name: string, image: string, description: string, dateLastEdited?: Date): Post {
@@ -132,81 +155,92 @@ export class PostDB {
   }
 
   get(
-    sortyBy: string = DATE_LAST_EDITED_NAME,
+    sortyBy: string = PostDB.fields.dateLastEdited,
     asc: boolean = true,
     pagination: PaginationParams
-  ) {
-    let index: SortIndex[] = this.dateModifiedSortIndex;
-    if (sortyBy === NAME_FIELD) {
-      index = this.nameSortIndex;
-    }
+  ): PostPaginatedResponse {
+    const index: SortIndex[] =
+      PostDB.fields[sortyBy] === PostDB.fields.name
+        ? this.nameSortIndex
+        : this.dateModifiedSortIndex;
 
     const ids: number[] = [];
+    let start: number;
+    let end: number;
+    let next: boolean;
     if (asc) {
-      const start = pagination.page * pagination.limit;
-      const end = start + pagination.limit;
-      if (end > index.length) {
-        return [];
-      }
+      start = pagination.page * pagination.limit;
+      end =
+        start + pagination.limit >= index.length
+          ? index.length
+          : start + pagination.limit;
+      next = end !== index.length;
       for (let i = start; i < end; i++) {
         ids.push(index[i].id);
       }
     } else {
-      const start = index.length - pagination.page * pagination.limit - 1;
-      const end = start - pagination.limit + 1;
-      if (end < 0) {
-        return [];
-      }
-      for (let i = start; i >= end; i--) {
+      start = index.length - pagination.page * pagination.limit - 1;
+      end = start - pagination.limit < -1 ? 0 : start - pagination.limit;
+      next = end !== 0;
+      for (let i = start; i > end; i--) {
         ids.push(index[i].id);
       }
     }
 
-    return this.returnPostsByID(ids);
+    return {
+      count: ids.length,
+      next,
+      posts: this.returnPostsByID(ids)
+    };
   }
 
-  search(query: string) {
-    const parsedSearchQuery = this.searchUtils.analyze(query);
-
-    let nameHits: number[] = [];
-    parsedSearchQuery.forEach((token) => {
-      if (token in this.nameSearchIndex) {
-        if (nameHits.length === 0) {
-          nameHits = this.nameSearchIndex[token];
-        } else {
-          nameHits = this.intersection(nameHits, this.nameSearchIndex[token]);
-        }
-      }
-    });
-
-    let descriptionHits: number[] = [];
-    parsedSearchQuery.forEach((token) => {
-      if (token in this.descriptionSearchIndex) {
-        if (descriptionHits.length === 0) {
-          descriptionHits = this.descriptionSearchIndex[token];
-        } else {
-          descriptionHits = this.intersection(
-            descriptionHits,
-            this.descriptionSearchIndex[token]
-          );
-        }
-      }
-    });
-
-    // const posts = {
-    //   nameHits: this.returnPostsByID(nameHits),
-    //   descriptionHits: this.returnPostsByID(descriptionHits)
-    // };
-
-    const posts: Post[] = [];
-
-    for (const key in Object.keys(this.entries)) {
-      const post = this.entries[key];
-      if (post.description.toLowerCase().includes(query)) {
-        posts.push(post);
-      }
+  search(
+    query: string,
+    searchIn: string = PostDB.fields.name,
+    pagination: PaginationParams
+  ): PostPaginatedResponse {
+    let posts: Post[] = [];
+    const exact = query[0] === '"' && query[query.length - 1] === '"';
+    if (exact) {
+      query = query.split('"')[1];
     }
 
-    return posts;
+    const parsedSearchQuery = this.searchUtils.analyze(query);
+    const index: SearchIndex =
+      PostDB.fields[searchIn] === PostDB.fields.name
+        ? this.nameSearchIndex
+        : this.descriptionSearchIndex;
+
+    let hits: number[] = [];
+    parsedSearchQuery.forEach((token) => {
+      if (token in index) {
+        if (hits.length === 0) {
+          hits = index[token];
+        } else {
+          hits = this.intersection(hits, index[token]);
+        }
+      }
+    });
+
+    const injectedPosts = this.returnPostsByID(hits);
+
+    if (exact) {
+      injectedPosts.forEach((post) => {
+        const field =
+          PostDB.fields[searchIn] === PostDB.fields.name ? post.name : post.description;
+        if (field.toLowerCase().includes(query.toLowerCase())) {
+          posts.push(post);
+        }
+      });
+    } else {
+      posts = posts.concat(injectedPosts);
+    }
+
+    const start = pagination.page * pagination.limit;
+    const end =
+      start + pagination.limit >= posts.length
+        ? posts.length
+        : start + pagination.limit;
+    return this.paginateSearchResponse(posts, start, end);
   }
 }

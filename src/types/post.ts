@@ -1,3 +1,5 @@
+import { PaginatedResponseMetadata } from "./db";
+
 export interface BasePost {
   name: string;
   image: string;
@@ -15,4 +17,8 @@ export interface MockPost extends BasePost {
 
 export interface PostStorage {
   [key: number]: Post;
+}
+
+export interface PostPaginatedResponse extends PaginatedResponseMetadata {
+  posts: Post[];
 }
