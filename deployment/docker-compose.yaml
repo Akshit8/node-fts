@@ -1,0 +1,20 @@
+version: "3.7"
+
+services:
+  app:
+    image: akshit8/node-fts
+    container_name: node-fts
+    restart: always
+    ports:
+      - 3000:3000
+
+  logger:
+    container_name: fluentd
+    user: root
+    image: fluent/fluentd:v1.11-debian
+    volumes:
+    - /var/lib/docker/containers:/fluentd/log/containers
+    - ./fluent.conf:/fluentd/etc/fluent.conf
+    - ./logs:/output/
+    logging:
+      driver: "local"

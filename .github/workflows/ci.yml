@@ -1,0 +1,49 @@
+name: node-fts-ci
+
+on:
+  workflow_dispatch
+
+jobs:
+  ci:
+    name: CI job(lint, test, build)
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: checkout
+      uses: actions/checkout@v2
+    
+    - name: setup node
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14'
+
+    - name: install deps
+      run: |
+        npm ci
+      
+    - name: format and lint
+      run: |
+        npm run format
+        npm run lint
+
+    - name: test
+      run: |
+        # npm run test
+
+    - name: build
+      run: |
+        npm run build
+        docker build -t akshit8/node-fts -f ./deployment/Dockerfile .
+
+    - name: docker login
+      run: |
+        docker login -u ${{secrets.USERNAME}} -p ${{secrets.PASSWORD}}
+
+    - name: push docker image
+      run: |
+        docker push akshit8/node-fts
+
+    
+
+
+
