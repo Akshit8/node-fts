@@ -19,8 +19,12 @@ export class PostDB implements DB {
 
   private entries: PostStorage;
   private count: number;
+
+  // sort indexes
   private nameSortIndex: SortIndex[];
   private dateModifiedSortIndex: SortIndex[];
+
+  // search indexes
   private nameSearchIndex: SearchIndex;
   private descriptionSearchIndex: SearchIndex;
   private searchUtils: SearchUtils;
