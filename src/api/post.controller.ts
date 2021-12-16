@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
-import { PostPaginatedResponse } from "../types";
 import { POSTS_PER_PAGE } from "../config";
 import { PostDBInstance } from "../db";
+import { PostPaginatedResponse } from "../types";
 import { renderAPIResponse } from "../utils";
 
 export const addPostController = async (
@@ -25,11 +25,11 @@ export const getPostsController = async (
   const limit = Number(req.query.limit) || POSTS_PER_PAGE;
   const query = <string | undefined>req.query.query;
   const searchIn = <string | undefined>req.query.searchIn;
-  let posts: PostPaginatedResponse;
+  let resp: PostPaginatedResponse;
   if (query) {
-    posts = PostDBInstance.search(query, searchIn, { page, limit });
+    resp = PostDBInstance.search(query, searchIn, { page, limit });
   } else {
-    posts = PostDBInstance.get(sortBy, asc, { page, limit });
+    resp = PostDBInstance.get(sortBy, asc, { page, limit });
   }
-  renderAPIResponse({ status_code: 200, data: { posts } }, res);
+  renderAPIResponse({ status_code: 200, data: resp }, res);
 };
